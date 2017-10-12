@@ -1,0 +1,59 @@
+#!/usr/local/bin/perl
+
+$SEARCH = "./search.pl";
+
+if(-f "jcode.pl"){
+    $jflag=true;
+    $kcode="sjis";
+    $hcode="x-sjis";
+    require "./jcode.pl";
+}
+
+read(STDIN, $query_string, $ENV{'CONTENT_LENGTH'});
+@a = split(/&/, $query_string);
+foreach $a (@a) {
+    ($name, $value) = split(/=/, $a);
+    $value =~ tr/+/ /;
+    $value =~ s/%([0-9a-fA-F][0-9a-fA-F])/pack("C", hex($1))/eg;
+    if($jflag){
+        &jcode'convert(*value, "jis");
+    }
+    if ($allow_tags) {
+        $value =~ s/<!--/&lt;!--/g;
+        $value =~ s/-->/--&gt;/g;
+    }else{
+        $value =~ s/&/&amp;/g;
+        $value =~ s/"/&quot;/g;
+        $value =~ s/</&lt;/g;
+        $value =~ s/>/&gt;/g;
+    }
+    if($jflag){
+        $value =~ s/>/&gt;/g;
+    }
+    $FORM{$name} = $value;
+}
+$keyword = $FORM{'KEYWORD'};
+
+print "Content-type: text/html\n\n";
+print "<head>\n";
+print "<title>sample1-1</title>\n";
+print "</head>\n";
+print "<body bgcolor=\"white\" text=\"black\">\n";
+print "<basefont size=\"4\">\n";
+print "<h1>Result</h1>\n";
+print "keyword = $keyword<br>\n";
+print "<ul>\n";
+@search_result = `echo $keyword | $SEARCH`;
+for($i = 0 ; $i <= $#search_result ; ++($i)){
+  @result = split(/,/, $search_result[$i]); 
+  print "<li>\n";
+  print "<a href=\"$result[3]\">$result[0]</a>\n";
+  print "<ul>\n";
+  print "<li>title = $result[1]\n";
+  print "<li>author = $result[2]\n";
+  print "</ul>\n";
+}
+print "</ul>\n";
+print "</body>\n";
+
+#end
