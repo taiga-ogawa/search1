@@ -1,0 +1,17 @@
+#!/bin/bash
+
+lookup() {
+	query=`cat`
+	
+	while IFS='&' read pair query <<< "${query}" && [ -n "${pair}" ]; do
+		IFS='=' read key value <<< "${pair}"
+		
+		if [ "$key" = "$1" ]; then
+			echo "${value}"
+		fi
+	done
+}
+
+decode() {
+	echo -e "`sed 's/%/\\\\x/g' | tr '+' ' '`"
+}
