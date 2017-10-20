@@ -1,4 +1,5 @@
 #!/bin/bash
+# Coded by Hinata Yanagi
 
 lookup() {
 	query=`cat`
